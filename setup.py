@@ -2,95 +2,50 @@
 from __future__ import print_function
 
 import os
-import subprocess
 import sys
-import re
 
 from setuptools import Extension, setup
 
 try:
     from Cython.Build import cythonize
 except ImportError:
-    print('You need to install cython first - sudo pip install cython', file=sys.stderr)
+    print('You need to install cython first - pip install cython',
+          file=sys.stderr)
     sys.exit(1)
 
 
-# https://gist.github.com/smidm/ff4a2c079fed97a92e9518bd3fa4797c
-def pkgconfig(*packages, **kw):
-    """
-    Query pkg-config for library compile and linking options. Return configuration in distutils
-    Extension format.
+POPPLER_ROOT = os.environ.get('POPPLER_ROOT', '')
+if not POPPLER_ROOT:
+    print('Please clone and compile poppler from source and set POPPLER_ROOT '
+          'environment variable. See README for more info.', file=sys.stderr)
+    sys.exit(1)
+POPPLER_CPP_LIB_DIR = os.path.join(POPPLER_ROOT, 'cpp/')
 
-    Usage:
-
-    pkgconfig('opencv')
-
-    pkgconfig('opencv', 'libavformat')
-
-    pkgconfig('opencv', optional='--static')
-
-    pkgconfig('opencv', config=c)
-
-    returns e.g.
-
-    {'extra_compile_args': [],
-     'extra_link_args': [],
-     'include_dirs': ['/usr/include/ffmpeg'],
-     'libraries': ['avformat'],
-     'library_dirs': []}
-
-     Intended use:
-
-     distutils.core.Extension('pyextension', sources=['source.cpp'], **c)
-
-     Set PKG_CONFIG_PATH environment variable for nonstandard library locations.
-
-    based on work of Micah Dowty (http://code.activestate.com/recipes/502261-python-distutils-pkg-config/)
-    """
-    config = kw.setdefault('config', {})
-    optional_args = kw.setdefault('optional', '')
-    # { <distutils Extension arg>: [<pkg config option>, <prefix length to strip>], ...}
-    flag_map = {'include_dirs': ['--cflags-only-I', 2],
-                'library_dirs': ['--libs-only-L', 2],
-                'libraries': ['--libs-only-l', 2],
-                'extra_compile_args': ['--cflags-only-other', 0],
-                'extra_link_args': ['--libs-only-other', 0],
-                }
-    for package in packages:
-        for distutils_key, (pkg_option, n) in flag_map.items():
-            items = subprocess.check_output(['pkg-config', optional_args, pkg_option, package]).decode('utf8').split()
-            config.setdefault(distutils_key, []).extend([i[n:] for i in items])
-    return config
-
-# POPPLER_ROOT = os.environ.get('POPPLER_ROOT', '~/occrp/poppler')
-# if POPPLER_ROOT:
-#     POPPLER_CPP_LIB_DIR = os.path.join(POPPLER_ROOT, 'cpp/')
-#     poppler_ext = Extension('pdfparser.poppler', ['pdfparser/poppler.pyx'], language='c++',
-#                             extra_compile_args=mac_compile_args if sys.platform == 'darwin' else ["-std=c++11"],
-#                             include_dirs=[POPPLER_ROOT, os.path.join(POPPLER_ROOT, 'poppler')],
-#                             library_dirs=[POPPLER_ROOT, POPPLER_CPP_LIB_DIR],
-#                             runtime_library_dirs=['$ORIGIN'],
-#                             libraries=['poppler','poppler-cpp'])
-#     package_data = {'pdfparser': ['*.so.*', 'pdfparser/*.so.*']}
-# else:
-poppler_config = pkgconfig("poppler", "poppler-cpp")
-# Mac OS build fix:
-mac_compile_args = ["-std=c++11", "-stdlib=libc++", "-mmacosx-version-min=10.7"]
 if sys.platform == 'darwin':
-    poppler_config.setdefault('extra_compile_args', []).extend(mac_compile_args)
-print(poppler_config)
-poppler_config["include_dirs"].append("./poppler")
-poppler_ext = Extension('pdfparser', ['pdfparser.pyx', 'poppler/utils/ImageOutputDev.cc'], language='c++', **poppler_config)
-package_data = {}
+    # OS X extras
+    extra_compile_args = [
+        "-std=c++11", "-stdlib=libc++", "-mmacosx-version-min=10.7"
+    ]
+else:
+    extra_compile_args = ["-std=c++11"]
+
+poppler_ext = Extension('pdflib',
+                        ['pdflib.pyx', 'poppler/utils/ImageOutputDev.cc'],
+                        language='c++',
+                        extra_compile_args=extra_compile_args,
+                        include_dirs=[
+                            POPPLER_ROOT, os.path.join(POPPLER_ROOT, 'poppler')
+                        ],
+                        library_dirs=[POPPLER_ROOT, POPPLER_CPP_LIB_DIR],
+                        runtime_library_dirs=['$ORIGIN'],
+                        libraries=['poppler', 'poppler-cpp'])
 
 setup(
-    name='pdfparser',
-    version = '0.1',
+    name='pdflib',
+    version='0.1',
     description="python bindings for poppler",
     install_requires=['cython', ],
-    packages=['pdfparser', ],
-    package_data=package_data,
     include_package_data=True,
-    ext_modules=cythonize([poppler_ext]), # a workaround since Extension is an old-style class
+    ext_modules=cythonize([poppler_ext]),
     zip_safe=False
 )

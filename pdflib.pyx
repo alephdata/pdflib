@@ -4,18 +4,23 @@ from cpython cimport bool as PyBool
 
 ctypedef bool GBool
 
+
 cdef extern from "cpp/poppler-version.h" namespace "poppler":
     cdef string version_string()
-    
+
+
 def poppler_version():
     return version_string()
+
 
 cdef extern from "poppler/GlobalParams.h":
     GlobalParams *globalParams
     cdef cppclass GlobalParams:
         pass
 
+
 globalParams = new GlobalParams()
+
 
 cdef extern from "goo/GooString.h":
     cdef cppclass GooString:
