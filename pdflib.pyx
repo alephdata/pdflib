@@ -2,6 +2,8 @@ from libcpp cimport bool
 from libcpp.string cimport string
 from cpython cimport bool as PyBool
 
+import os
+
 ctypedef bool GBool
 
 
@@ -40,14 +42,29 @@ cdef extern from 'poppler/Annot.h':
         pass
 
 
+cdef extern from 'poppler/Dict.h':
+    cdef cppclass Dict:
+        int getLength()
+        char *getKey(int i)
+        Object getVal(int i)
+
+
+cdef extern from 'poppler/Object.h':
+    cdef cppclass Object:
+        GBool isDict()
+        Dict *getDict()
+        GBool isString()
+        GooString *takeString()
+
+
 cdef extern from "poppler/PDFDoc.h":
     cdef cppclass PDFDoc:
         int getNumPages()
         void displayPage(OutputDev *out, int page,
-           double hDPI, double vDPI, int rotate,
-           GBool useMediaBox, GBool crop, GBool printing,
-           GBool (*abortCheckCbk)(void *data) = NULL,
-           void *abortCheckCbkData = NULL,
+            double hDPI, double vDPI, int rotate,
+            GBool useMediaBox, GBool crop, GBool printing,
+            GBool (*abortCheckCbk)(void *data) = NULL,
+            void *abortCheckCbkData = NULL,
             GBool (*annotDisplayDecideCbk)(Annot *annot, void *user_data) = NULL,
             void *annotDisplayDecideCbkData = NULL, GBool copyXRef = False)
         void displayPages(OutputDev *out, int firstPage, int lastPage,
@@ -60,6 +77,7 @@ cdef extern from "poppler/PDFDoc.h":
         double getPageMediaWidth(int page)
         double getPageMediaHeight(int page)
         GooString *readMetadata()
+        Object getDocInfo()
 
 
 cdef extern from "poppler/PDFDocFactory.h":
@@ -101,7 +119,8 @@ cdef class Document:
         PyBool phys_layout
         double fixed_pitch
 
-    def __cinit__(self, char *fname, PyBool phys_layout=False, double fixed_pitch=0):
+    def __cinit__(self, char *fname, PyBool phys_layout=False,
+                  double fixed_pitch=0):
         cdef ImageOutputDev *imgOut
         self._doc=PDFDocFactory().createPDFDoc(GooString(fname))
         self._pg=0
@@ -117,7 +136,9 @@ cdef class Document:
             return self._doc.getNumPages()  
 
     cdef void render_page(self, int page_no, OutputDev *dev):
-        self._doc.displayPage(dev, page_no, RESOLUTION, RESOLUTION, 0, True, False, False)
+        self._doc.displayPage(
+            dev, page_no, RESOLUTION, RESOLUTION, 0, True, False, False
+        )
      
     cdef object get_page_size(self, page_no):
             cdef double w,h
@@ -137,25 +158,44 @@ cdef class Document:
         self._pg+=1
         return self.get_page(self._pg)
 
-    def extract_images(self):
+    def extract_images(self, path, prefix):
+        """Extract images in the document to `path`. Image file names are
+        prefixed with `prefix`. `path` is created if it doesn't exist."""
         firstPage = 1
         lastPage = self.no_of_pages
-        imgOut = new ImageOutputDev("images/", False, False)
+        if not os.path.exists(path):
+            os.makedirs(path)
+        # prevent upward traversal
+        prefix = os.path.normpath('/' + prefix).lstrip('/')
+        imgOut = new ImageOutputDev(os.path.join(path, prefix), False, False)
+        # export as png
         imgOut.enablePNG(True)
-        imgOut.enableTiff(True)
-        imgOut.enableJpeg(True)
-        imgOut.enableJpeg2000(True)
-        imgOut.enableJBig2(True)
-        imgOut.enableCCITT(True)
+        # imgOut.enableTiff(True)
+        # imgOut.enableJpeg(True)
+        # imgOut.enableJpeg2000(True)
+        # imgOut.enableJBig2(True)
+        # imgOut.enableCCITT(True)
         self._doc.displayPages(
-            <OutputDev*> imgOut, firstPage, lastPage, 72, 72, 0, True, False, False
+            <OutputDev*> imgOut, firstPage, lastPage, 72,
+            72, 0, True, False, False
         )
         del imgOut
 
     property metadata:
         def __get__(self):
-            data = self._doc.readMetadata()
-            return data.getCString().decode('UTF-8', 'replace')
+            metadata = self._doc.getDocInfo()
+            if metadata.isDict():
+                mtdt = {}
+                for i in range(0, metadata.getDict().getLength()):
+                    key = metadata.getDict().getKey(i)
+                    val = metadata.getDict().getVal(i)
+                    if val.isString():
+                        mtdt[key] = val.takeString().getCString().decode(
+                            'UTF-8', 'replace'
+                        )
+            else:
+                mtdt = {}
+            return mtdt
 
 
 cdef class Page:
@@ -167,7 +207,9 @@ cdef class Page:
     def __cinit__(self, int page_no, Document doc):
         cdef TextOutputDev *dev
         self.page_no=page_no
-        dev = new TextOutputDev(NULL, doc.phys_layout, doc.fixed_pitch, False, False);
+        dev = new TextOutputDev(
+            NULL, doc.phys_layout, doc.fixed_pitch, False, False
+        );
         doc.render_page(page_no, <OutputDev*> dev)
         self.page= dev.takeText()
         del dev
