@@ -19,7 +19,6 @@ if not POPPLER_ROOT:
     print('Please clone and compile poppler from source and set POPPLER_ROOT '
           'environment variable. See README for more info.', file=sys.stderr)
     sys.exit(1)
-POPPLER_CPP_LIB_DIR = os.path.join(POPPLER_ROOT, 'cpp/')
 
 if sys.platform == 'darwin':
     # OS X extras
@@ -29,8 +28,11 @@ if sys.platform == 'darwin':
 else:
     extra_compile_args = ["-std=c++11"]
 
+POPPLER_CPP_LIB_DIR = os.path.join(POPPLER_ROOT, 'cpp/')
+POPPLER_UTILS_DIR = os.path.join(POPPLER_ROOT, 'utils/')
 poppler_ext = Extension('pdflib',
-                        ['pdflib.pyx', 'poppler/utils/ImageOutputDev.cc'],
+                        ['pdflib.pyx',
+                         os.path.join(POPPLER_UTILS_DIR, 'ImageOutputDev.cc')],
                         language='c++',
                         extra_compile_args=extra_compile_args,
                         include_dirs=[
@@ -42,7 +44,7 @@ poppler_ext = Extension('pdflib',
 
 setup(
     name='pdflib',
-    version='0.1',
+    version='0.1.1',
     description="python bindings for poppler",
     install_requires=['cython', ],
     include_package_data=True,
