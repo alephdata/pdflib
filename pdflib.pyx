@@ -1,7 +1,6 @@
 from libcpp cimport bool
 from libcpp.string cimport string
 from cpython cimport bool as PyBool
-from cpython.object cimport Py_EQ, Py_NE
 
 import os
 
@@ -111,7 +110,6 @@ cdef extern from "poppler/TextOutputDev.h":
     cdef cppclass TextBlock:
         TextBlock *getNext()
         TextLine *getLines()
-        void getBBox(double *xMinA, double *yMinA, double *xMaxA, double *yMaxA)
 
     cdef cppclass TextLine:
         TextWord *getWords()
@@ -119,26 +117,10 @@ cdef extern from "poppler/TextOutputDev.h":
 
     cdef cppclass TextWord:
         TextWord *getNext()
-        int getLength()
         GooString *getText()
-        void getBBox(double *xMinA, double *yMinA, double *xMaxA, double *yMaxA)
         void getCharBBox(int charIdx, double *xMinA, double *yMinA,
            double *xMaxA, double *yMaxA)
         GBool hasSpaceAfter  ()
-        TextFontInfo *getFontInfo(int idx)
-        GooString *getFontName(int idx)
-        double getFontSize()
-        void getColor(double *r, double *g, double *b)
-
-    cdef cppclass TextFontInfo:
-        GooString *getFontName()
-        double getAscent();
-        double getDescent();
-        GBool isFixedWidth()
-        GBool isSerif()
-        GBool isSymbolic()
-        GBool isItalic()
-        GBool isBold()
 
 
 cdef extern from "utils/ImageOutputDev.h":
@@ -257,7 +239,7 @@ cdef class Page:
 
     def __cinit__(self, int page_no, Document doc):
         cdef TextOutputDev *dev
-        self.page_no=page_no
+        self.page_no = page_no
         dev = new TextOutputDev(NULL, doc.phys_layout, doc.fixed_pitch, False, False)
         doc.render_page(page_no, <OutputDev*> dev)
         self.page = dev.takeText()
@@ -273,12 +255,12 @@ cdef class Page:
         return self
 
     def __next__(self):
-        cdef Flow f
+        cdef Flow flow
         if not self.curr_flow:
             raise StopIteration()
-        f = Flow(self)
+        flow = Flow(self)
         self.curr_flow = self.curr_flow.getNext()
-        return f
+        return flow
 
     property page_no:
         def __get__(self):
@@ -346,133 +328,36 @@ cdef class Block:
         self.curr_line = self.curr_line.getNext()
         return line
 
-    property bbox:
-        def __get__(self):
-            cdef double x1, y1, x2, y2
-            self.block.getBBox(&x1, &y1, &x2, &y2)
-            return  BBox(x1, y1, x2, y2)
-
-
-cdef class BBox:
-    cdef double x1, y1, x2, y2
-
-    def __cinit__(self, double x1, double y1, double x2, double y2 ):
-        self.x1 = x1
-        self.x2 = x2
-        self.y1 = y1
-        self.y2 = y2
-
-    def as_tuple(self):
-        return self.x1, self.y1, self.x2, self.y2
-
-    def __getitem__(self, i):
-        if i == 0:
-            return self.x1
-        elif i == 1:
-            return self.y1
-        elif i == 2:
-            return self.x2
-        elif i == 3:
-            return self.y2
-        raise IndexError()
-
-    property x1:
-        def __get__(self):
-            return self.x1
-        def __set__(self, double val):
-            self.x1 = val
-
-    property x2:
-        def __get__(self):
-            return self.x2
-        def __set__(self, double val):
-            self.x2 = val
-
-    property y1:
-        def __get__(self):
-            return self.y1
-        def __set__(self, double val):
-            self.y1 = val
-
-    property y2:
-        def __get__(self):
-            return self.y2
-        def __set__(self, double val):
-            self.y2 = val
-
 
 cdef class Line:
     cdef:
         TextLine *line
-        double x1, y1, x2, y2
         unicode _text
-        list _bboxes
 
     def __cinit__(self, Block block):
         self.line = block.curr_line
 
     def __init__(self, Block block):
-        self._text=u''  # text bytes
-        self.x1 = 0
-        self.y1 = 0
-        self.x2 = 0
-        self.y2 = 0
-        self._bboxes = []
+        self._text = u''
         self._get_text()
-        assert len(self._text) == len(self._bboxes)
 
     def _get_text(self):
         cdef:
             TextWord *word
             GooString *string
-            double bx1,bx2, by1, by2
             list words = []
-            int offset = 0, i, wlen
-            BBox last_bbox
-            # FontInfo last_font
-            double r, g, b
 
         word = self.line.getWords()
         while word:
-            wlen = word.getLength()
-            # gets bounding boxes for all characters
-            for i in range(wlen):
-                word.getCharBBox(i, &bx1, &by1, &bx2, &by2 )
-                last_bbox = BBox(bx1,by1,bx2,by2)
-                # if previous word is space update it's right end
-                if i == 0 and words and words[-1] == u' ':
-                    self._bboxes[-1].x2=last_bbox.x1
-
-                self._bboxes.append(last_bbox)
-            # and then text as UTF-8 bytes
             string = word.getText()
-            words.append(string.getCString().decode('UTF-8')) # decoded to python unicode string
+            words.append(string.getCString().decode('UTF-8'))
             del string
-            #calculate line bbox
-            word.getBBox(&bx1, &by1, &bx2, &by2)
-            if bx1 < self.x1 or self.x1 == 0:
-                self.x1 = bx1
-            if by1 < self.y1 or self.y1 == 0:
-                self.y1 = by1
-            if bx2 > self.x2:
-                self.x2 = bx2
-            if by2 > self.y2:
-                self.y2 = by2
             # add space after word if necessary
             if word.hasSpaceAfter():
                 words.append(u' ')
-                self._bboxes.append(BBox(last_bbox.x2, last_bbox.y1, last_bbox.x2, last_bbox.y2))
             word = word.getNext()
-        self._text= u''.join(words)
-
-    property bbox:
-        def __get__(self):
-            return BBox(self.x1,self.y1,self.x2,self.y2)
+        self._text = u''.join(words)
 
     property text:
         def __get__(self):
             return self._text
-
-    property char_bboxes:
-        def __get__(self):
-            return self._bboxes
