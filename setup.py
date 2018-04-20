@@ -39,7 +39,6 @@ poppler_ext = Extension('pdflib',
                             POPPLER_ROOT, os.path.join(POPPLER_ROOT, 'poppler')
                         ],
                         library_dirs=[POPPLER_ROOT, POPPLER_CPP_LIB_DIR],
-                        runtime_library_dirs=['$ORIGIN'],
                         libraries=['poppler', 'poppler-cpp'])
 
 setup(
