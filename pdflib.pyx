@@ -3,9 +3,10 @@ from libcpp.string cimport string
 from cpython cimport bool as PyBool
 
 import os
+from utils import xmp_to_dict
+
 
 ctypedef bool GBool
-DEF PRECISION = 1e-6
 
 
 cdef extern from "cpp/poppler-version.h" namespace "poppler":
@@ -226,8 +227,10 @@ cdef class Document:
         def __get__(self):
             metadata = self._doc.readMetadata()
             if metadata:
-                return metadata.getCString().decode('UTF-8')
-            return None
+                return xmp_to_dict(
+                    metadata.getCString().decode('UTF-8').strip()
+                )
+            return {}
 
 
 cdef class Page:
@@ -277,7 +280,7 @@ cdef class Page:
             for flow in self:
                 for block in flow:
                     for line in block:
-                        lines.append(line.text.encode('UTF-8'))
+                        lines.append(line.text)
             return lines
 
     def extract_images(self, path, prefix):

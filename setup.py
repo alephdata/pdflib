@@ -45,7 +45,7 @@ setup(
     name='pdflib',
     version='0.1.1',
     description="python bindings for poppler",
-    install_requires=['cython', ],
+    install_requires=['cython', 'lxml'],
     include_package_data=True,
     ext_modules=cythonize([poppler_ext]),
     zip_safe=False
