@@ -13,7 +13,7 @@ gmake install
 cd ..
 
 # Install dependencies
-yum install freetype-devel.x86_64 fontconfig-devel.x86_64 libjpeg-devel.x86_64
+yum install -y freetype-devel.x86_64 fontconfig-devel.x86_64 libjpeg-devel.x86_64
 
 # Clone and compile poppler
 git clone --branch poppler-0.63.0 --depth 1 https://anongit.freedesktop.org/git/poppler/poppler.git poppler_src
@@ -46,6 +46,6 @@ done
 
 # Install packages and test
 for PYBIN in /opt/python/*/bin/; do
-    "${PYBIN}/pip" install python-manylinux-demo --no-index -f wheelhouse/
+    "${PYBIN}/pip" install pdflib --no-index -f wheelhouse/
     (cd "$HOME"; "${PYBIN}/python" -c "import pdflib")
 done
