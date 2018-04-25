@@ -3,7 +3,7 @@ from libcpp.string cimport string
 from cpython cimport bool as PyBool
 
 import os
-from utils import xmp_to_dict
+from .utils import xmp_to_dict
 
 
 ctypedef bool GBool
@@ -213,7 +213,7 @@ cdef class Document:
             if metadata.isDict():
                 mtdt = {}
                 for i in range(0, metadata.getDict().getLength()):
-                    key = metadata.getDict().getKey(i)
+                    key = metadata.getDict().getKey(i).lower()
                     val = metadata.getDict().getVal(i)
                     if val.isString():
                         mtdt[key] = val.takeString().getCString().decode(
