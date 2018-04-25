@@ -33,9 +33,7 @@ POPPLER_CPP_LIB_DIR = os.path.join(POPPLER_ROOT, 'cpp/')
 POPPLER_UTILS_DIR = os.path.join(POPPLER_ROOT, 'utils/')
 poppler_ext = Extension('pdflib.poppler',
                         ['pdflib/poppler.pyx',
-                         os.path.relpath(os.path.join(
-                             POPPLER_UTILS_DIR, 'ImageOutputDev.cc'
-                        ))],
+                         os.path.join(POPPLER_UTILS_DIR, 'ImageOutputDev.cc')],
                         language='c++',
                         extra_compile_args=extra_compile_args,
                         include_dirs=[
@@ -46,11 +44,10 @@ poppler_ext = Extension('pdflib.poppler',
 
 setup(
     name='pdflib',
-    version='0.1.1',
+    version='0.1.2',
     description="python bindings for poppler",
     install_requires=['cython', 'lxml'],
     packages=['pdflib'],
-    include_package_data=True,
     ext_modules=cythonize([poppler_ext]),
     zip_safe=False,
     cmdclass={'build_ext': build_ext},

@@ -1,3 +1,1 @@
-recursive-include poppler/
-include *.pxd
-include *.pyx
+include pdflib/*.pyx
