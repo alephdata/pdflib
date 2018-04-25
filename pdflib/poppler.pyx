@@ -3,6 +3,7 @@ from libcpp.string cimport string
 from cpython cimport bool as PyBool
 
 import os
+from collections import defaultdict
 from .utils import xmp_to_dict
 
 
@@ -180,6 +181,7 @@ cdef class Document:
 
     def __next__(self):
         if self._pg >= self.no_of_pages:
+            self._pg = 0
             raise StopIteration()
         self._pg += 1
         return self.get_page(self._pg)
@@ -230,7 +232,7 @@ cdef class Document:
                 return xmp_to_dict(
                     metadata.getCString().decode('UTF-8').strip()
                 )
-            return {}
+            return defaultdict(dict)
 
 
 cdef class Page:
