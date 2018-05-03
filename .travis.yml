@@ -9,6 +9,8 @@ matrix:
       env: DOCKER_IMAGE=quay.io/pypa/manylinux1_x86_64
 
 install:
+  - echo $TRAVIS_TAG
+  - echo $TRAVIS_BRANCH
   - docker pull $DOCKER_IMAGE
 
 script:
