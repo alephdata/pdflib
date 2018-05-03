@@ -12,6 +12,6 @@ install:
   - docker pull $DOCKER_IMAGE
 
 script:
-  - sudo chmod +x /io/build-wheels/manylinux.sh
+  - sudo chmod +x ./build-wheels/manylinux.sh
   - docker run --rm -v `pwd`:/io $DOCKER_IMAGE $PRE_CMD /io/build-wheels/manylinux.sh
   - ls wheelhouse/
