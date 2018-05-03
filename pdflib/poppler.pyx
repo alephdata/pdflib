@@ -136,7 +136,7 @@ cdef extern from "utils/ImageOutputDev.h":
         void enableCCITT(GBool ccitt)
 
 
-cdef double RESOLUTION = 72.0
+cdef double RESOLUTION = 300.0
 
 
 cdef class Document:
@@ -160,7 +160,7 @@ cdef class Document:
 
     property no_of_pages:
         def __get__(self):
-            return self._doc.getNumPages()  
+            return self._doc.getNumPages()
 
     cdef void render_page(self, int page_no, OutputDev *dev):
         self._doc.displayPage(
@@ -204,8 +204,8 @@ cdef class Document:
         # imgOut.enableJBig2(True)
         # imgOut.enableCCITT(True)
         self._doc.displayPages(
-            <OutputDev*> imgOut, firstPage, lastPage, 72,
-            72, 0, True, False, False
+            <OutputDev*> imgOut, firstPage, lastPage, RESOLUTION,
+            RESOLUTION, 0, True, False, False
         )
         del imgOut
 
