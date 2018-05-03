@@ -1,6 +1,8 @@
 pdflib
 -------
 
+[![Build Status](https://travis-ci.org/alephdata/pdflib.svg?branch=master)](https://travis-ci.org/alephdata/pdflib)
+
 Python binding for poppler.
 
 ## Installation
@@ -63,3 +65,7 @@ Getting images from each page
 >>> for page in doc:
         page.extract_images(path='images', prefix='img')
 ```
+
+LICENSE
+-------
+pdflib is available under GPL v3 (poppler is GPL).

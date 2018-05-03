@@ -44,10 +44,11 @@ poppler_ext = Extension('pdflib.poppler',
 
 setup(
     name='pdflib',
-    version='0.1.5',
+    version='0.1.6',
     description="python bindings for poppler",
     author='Journalism Development Network',
     author_email='data@occrp.org',
+    license='GPLv3',
     url='http://github.com/alephdata/pdflib',
     install_requires=['cython', 'lxml'],
     packages=['pdflib'],
