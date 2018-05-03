@@ -5,7 +5,7 @@ cd /io/
 
 # Upgrade cmake
 wget http://www.cmake.org/files/v3.2/cmake-3.2.0.tar.gz --no-check-certificate
-tar -zxvf cmake-3.2.0.tar.gz
+tar -zxf cmake-3.2.0.tar.gz
 cd cmake-3.2.0
 ./bootstrap --prefix=/usr
 gmake --silent
@@ -47,5 +47,5 @@ for PYBIN in /opt/python/*/bin/; do
     "${PYBIN}/pip" install pdflib --no-index -f wheelhouse/
     (cd $HOME; "${PYBIN}/python" -c "import pdflib")
     "${PYBIN}/pip" install pytest
-    "${PYBIN}/pytest"
+    "${PYBIN}/pytest /io/tests/"
 done
