@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e -x
 
-cd /pdflib/
+cd /io/
 
 # Upgrade cmake
 wget http://www.cmake.org/files/v3.2/cmake-3.2.0.tar.gz --no-check-certificate
@@ -20,11 +20,12 @@ git clone --branch poppler-0.63.0 --depth 1 https://anongit.freedesktop.org/git/
 cd poppler_src/
 cmake -DENABLE_SPLASH=OFF -DENABLE_UTILS=OFF -DENABLE_LIBOPENJPEG=none .
 make
-export POPPLER_ROOT=/pdflib/poppler_src/
+export POPPLER_ROOT=/io/poppler_src/
 cd ..
 
 # Set shared library paths
-export LD_LIBRARY_PATH="/pdflib/poppler_src/:/pdflib/poppler_src/cpp/:/usr/lib64/"
+export LD_LIBRARY_PATH="/io/poppler_src/:/io/poppler_src/cpp/:/usr/lib64/"
+
 
 # install twine
 /opt/python/cp27-cp27m/bin/pip install twine
@@ -33,7 +34,7 @@ export TWINE=/opt/python/cp27-cp27m/bin/twine
 # Compile wheels
 for PYBIN in /opt/python/*/bin; do
     "${PYBIN}/pip" install cython
-    "${PYBIN}/pip" wheel /pdflib/ -w wheelhouse/
+    "${PYBIN}/pip" wheel /io/ -w wheelhouse/
 done
 
 # Bundle external shared libraries into the wheels
@@ -44,5 +45,7 @@ done
 # Install packages and test
 for PYBIN in /opt/python/*/bin/; do
     "${PYBIN}/pip" install pdflib --no-index -f wheelhouse/
-    (cd "$HOME"; "${PYBIN}/python" -c "import pdflib")
+    (cd /io/; "${PYBIN}/python" -c "import pdflib")
+    "${PYBIN}/pip" install pytest
+    "${PYBIN}/pytest"
 done
