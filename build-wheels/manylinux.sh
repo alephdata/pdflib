@@ -2,6 +2,7 @@
 set -e -x
 
 cd /io/
+ls /io/
 
 # Upgrade cmake
 wget http://www.cmake.org/files/v3.2/cmake-3.2.0.tar.gz --no-check-certificate
