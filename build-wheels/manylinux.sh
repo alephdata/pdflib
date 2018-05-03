@@ -8,7 +8,7 @@ wget http://www.cmake.org/files/v3.2/cmake-3.2.0.tar.gz --no-check-certificate
 tar -zxvf cmake-3.2.0.tar.gz
 cd cmake-3.2.0
 ./bootstrap --prefix=/usr
-gmake
+gmake --silent
 gmake install
 cd ..
 
@@ -19,7 +19,7 @@ yum install -y freetype-devel.x86_64 fontconfig-devel.x86_64 libjpeg-devel.x86_6
 git clone --branch poppler-0.63.0 --depth 1 https://anongit.freedesktop.org/git/poppler/poppler.git poppler_src
 cd poppler_src/
 cmake -DENABLE_SPLASH=OFF -DENABLE_UTILS=OFF -DENABLE_LIBOPENJPEG=none .
-make
+make --silent
 export POPPLER_ROOT=/io/poppler_src/
 cd ..
 
@@ -45,7 +45,7 @@ done
 # Install packages and test
 for PYBIN in /opt/python/*/bin/; do
     "${PYBIN}/pip" install pdflib --no-index -f wheelhouse/
-    (cd /io/; "${PYBIN}/python" -c "import pdflib")
+    (cd $HOME; "${PYBIN}/python" -c "import pdflib")
     "${PYBIN}/pip" install pytest
     "${PYBIN}/pytest"
 done
