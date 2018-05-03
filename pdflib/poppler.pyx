@@ -194,7 +194,7 @@ cdef class Document:
         if not os.path.exists(path):
             os.makedirs(path)
         # prevent upward traversal
-        prefix = os.path.normpath('/' + prefix).lstrip('/')
+        prefix = os.path.normpath(b'/' + prefix).lstrip(b'/')
         imgOut = new ImageOutputDev(os.path.join(path, prefix), False, False)
         # export as png
         imgOut.enablePNG(True)
