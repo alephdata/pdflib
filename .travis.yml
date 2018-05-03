@@ -1,6 +1,3 @@
-notifications:
-  email: false
-
 matrix:
   include:
     - sudo: required
@@ -9,8 +6,6 @@ matrix:
       env: DOCKER_IMAGE=quay.io/pypa/manylinux1_x86_64
 
 install:
-  - echo $TRAVIS_TAG
-  - echo $TRAVIS_BRANCH
   - docker pull $DOCKER_IMAGE
 
 script:
@@ -20,7 +15,7 @@ script:
 after_success:
   - ls wheelhouse/
   - if [[ $TRAVIS_TAG = $TRAVIS_BRANCH ]]; then
-      pip install --upgrade six ;
-      pip install twine ;
+      sudo pip install --upgrade six ;
+      sudo pip install twine ;
       twine upload wheelhouse/pdflib-*manylinux*.whl ;
     fi
