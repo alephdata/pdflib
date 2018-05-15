@@ -9,20 +9,20 @@ matrix:
       env: PIP=pip2
 
 install:
-  - if [[ $TRAVIS_OS_NAME = "linux"]]; then docker pull $DOCKER_IMAGE; fi
+  - if [[ $TRAVIS_OS_NAME = "linux" ]]; then docker pull $DOCKER_IMAGE; fi
 
 script:
   # LINUX
-  - if [[ $TRAVIS_OS_NAME = "linux"]]; then sudo chmod +x ./build-wheels/manylinux.sh; fi
-  - if [[ $TRAVIS_OS_NAME = "linux"]]; then
+  - if [[ $TRAVIS_OS_NAME = "linux" ]]; then sudo chmod +x ./build-wheels/manylinux.sh; fi
+  - if [[ $TRAVIS_OS_NAME = "linux" ]]; then
       docker run --rm -v `pwd`:/io $DOCKER_IMAGE $PRE_CMD /io/build-wheels/manylinux.sh;
     fi
 
   # OS X
-  - if [[ $TRAVIS_OS_NAME = "osx"]]; then sudo chmod +x ./build-wheels/osx.sh; fi
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then $PIP install cibuildwheel==0.8.0; fi
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then cibuildwheel --output-dir wheelhouse; fi
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then
+  - if [[ $TRAVIS_OS_NAME = "osx" ]]; then sudo chmod +x ./build-wheels/osx.sh; fi
+  - if [[] "$TRAVIS_OS_NAME" == "osx" ]]; then $PIP install cibuildwheel==0.8.0; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then cibuildwheel --output-dir wheelhouse; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       python -m pip install pdflib --no-index -f wheelhouse/;
       python -m pip install pytest;
       python -m pytest /io/tests/;
