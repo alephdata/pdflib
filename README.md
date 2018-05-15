@@ -42,7 +42,7 @@ python setup.py build_ext --inplace
 
 ```
 >>> from pdflib import Document
->>> doc = Document(b"path/to/file.pdf")
+>>> doc = Document("path/to/file.pdf")
 ```
 
 Getting metadata
