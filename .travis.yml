@@ -19,8 +19,11 @@ script:
     fi
 
   # OS X
-  - if [[ $TRAVIS_OS_NAME = "osx" ]]; then sudo chmod +x ./build-wheels/osx.sh; fi
-  - if [[] "$TRAVIS_OS_NAME" == "osx" ]]; then $PIP install cibuildwheel==0.8.0; fi
+  - if [[ $TRAVIS_OS_NAME = "osx" ]]; then
+      sudo chmod +x ./build-wheels/osx.sh;
+      bash ./build-wheels/osx.sh;
+    fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then $PIP install cibuildwheel==0.8.0; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then cibuildwheel --output-dir wheelhouse; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       python -m pip install pdflib --no-index -f wheelhouse/;
