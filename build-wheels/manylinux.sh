@@ -37,8 +37,10 @@ for PYBIN in /opt/python/*/bin; do
     "${PYBIN}/pip" wheel /io/ -w wheelhouse/
 done
 
+ls wheelhouse/
+
 # Bundle external shared libraries into the wheels
-for whl in wheelhouse/pdflib-*manylinux*.whl; do
+for whl in wheelhouse/pdflib*.whl; do
     auditwheel repair "$whl" -w wheelhouse/
 done
 
