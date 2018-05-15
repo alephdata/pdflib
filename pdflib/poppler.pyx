@@ -3,7 +3,9 @@ from libcpp.string cimport string
 from cpython cimport bool as PyBool
 
 import os
+import sys
 from collections import defaultdict
+import six
 from .utils import xmp_to_dict
 
 
@@ -62,6 +64,7 @@ cdef extern from 'poppler/Object.h':
 
 cdef extern from "poppler/PDFDoc.h":
     cdef cppclass PDFDoc:
+        GBool isOk()
         int getNumPages()
         void displayPage(
             OutputDev *out, int page,
@@ -142,14 +145,27 @@ cdef double RESOLUTION = 300.0
 cdef class Document:
     cdef: 
         PDFDoc *_doc
+        ImageOutputDev *imgOut
         int _pg
         PyBool phys_layout
         double fixed_pitch
 
-    def __cinit__(self, char *fname, PyBool phys_layout=False,
+    def __cinit__(self, object fname, PyBool phys_layout=False,
                   double fixed_pitch=0):
-        cdef ImageOutputDev *imgOut
-        self._doc = PDFDocFactory().createPDFDoc(GooString(fname))
+        # Sanity checks
+        if not isinstance(fname, (six.binary_type, six.text_type)):
+            raise ValueError("Invalid path: " + repr(fname))
+        if isinstance(fname, six.binary_type):
+            fname = fname.decode(sys.getfilesystemencoding())
+        if not os.path.exists(fname) or not os.path.isfile(fname):
+            raise IOError("Not a valid file path: " + fname)
+
+        self._doc = PDFDocFactory().createPDFDoc(
+            GooString(fname.encode(sys.getfilesystemencoding()))
+        )
+        if not self._doc.isOk():
+            raise IOError("Error opening file: " + fname)
+
         self._pg = 0
         self.phys_layout = phys_layout
         self.fixed_pitch = fixed_pitch
@@ -191,18 +207,18 @@ cdef class Document:
         prefixed with `prefix`. `path` is created if it doesn't exist."""
         firstPage = first_page or 1
         lastPage = last_page or self.no_of_pages
+        if isinstance(path, six.binary_type):
+            path = path.decode(sys.getfilesystemencoding())
+        if isinstance(prefix, six.binary_type):
+            prefix = prefix.decode(sys.getfilesystemencoding())
         if not os.path.exists(path):
             os.makedirs(path)
         # prevent upward traversal
-        prefix = os.path.normpath(b'/' + prefix).lstrip(b'/')
-        imgOut = new ImageOutputDev(os.path.join(path, prefix), False, False)
+        prefix = os.path.normpath('/' + prefix).lstrip('/')
+        path = os.path.join(path, prefix).encode(sys.getfilesystemencoding())
+        imgOut = new ImageOutputDev(path, False, False)
         # export as png
         imgOut.enablePNG(True)
-        # imgOut.enableTiff(True)
-        # imgOut.enableJpeg(True)
-        # imgOut.enableJpeg2000(True)
-        # imgOut.enableJBig2(True)
-        # imgOut.enableCCITT(True)
         self._doc.displayPages(
             <OutputDev*> imgOut, firstPage, lastPage, RESOLUTION,
             RESOLUTION, 0, True, False, False

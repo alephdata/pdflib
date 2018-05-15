@@ -50,7 +50,7 @@ setup(
     author_email='data@occrp.org',
     license='GPLv3',
     url='http://github.com/alephdata/pdflib',
-    install_requires=['cython', 'lxml'],
+    install_requires=['cython', 'lxml', 'six'],
     packages=['pdflib'],
     ext_modules=cythonize([poppler_ext]),
     zip_safe=False,
