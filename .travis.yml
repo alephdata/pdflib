@@ -43,8 +43,7 @@ after_success:
         sudo pip install --upgrade six;
         sudo pip install twine;
         twine upload wheelhouse/pdflib*manylinux*.whl;
-      fi
-      if [[ $TRAVIS_OS_NAME = "osx" ]]; then
+      else
         pip3 install twine;
         python3 -m twine upload wheelhouse/pdflib*macosx*.whl;
       fi
