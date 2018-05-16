@@ -24,25 +24,17 @@ script:
       bash ./build-wheels/osx.sh;
     fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then $PIP install cibuildwheel==0.8.0 cython; fi
-  # - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-  #     export POPPLER_ROOT=$TRAVIS_BUILD_DIR/poppler_src/;
-  #     export LD_LIBRARY_PATH="$TRAVIS_BUILD_DIR/poppler_src/:$TRAVIS_BUILD_DIR/poppler_src/cpp/";
-  #     ls $POPPLER_ROOT;
-  #     pip2 install cython;
-  #     python2 setup.py bdist_wheel;
-  #     mkdir -p wheelhouse;
-  #     cp dist/*.whl wheelhouse/;
-  #   fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       export POPPLER_ROOT=$TRAVIS_BUILD_DIR/poppler_src/;
       export LD_LIBRARY_PATH="$TRAVIS_BUILD_DIR/poppler_src/:$TRAVIS_BUILD_DIR/poppler_src/cpp/";
       cibuildwheel --output-dir wheelhouse;
     fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-      $PIP install pdflib --no-index -f wheelhouse/;
-      (cd $HOME; python2 -c "import pdflib");
+      $PIP install -U --force-reinstall pdflib --no-index -f wheelhouse/;
+      cd $HOME;
+      python2 -c "import pdflib";
       $PIP install pytest;
-      python2 -m pytest tests;
+      python2 -m pytest $TRAVIS_BUILD_DIR/tests;
     fi
 
 after_success:
