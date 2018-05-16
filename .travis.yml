@@ -31,7 +31,6 @@ script:
     fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       $PIP install -U --force-reinstall pdflib --no-index -f wheelhouse/;
-      ls;
       rm -rf pdflib;
       $PIP install pytest;
       python2 -m pytest $TRAVIS_BUILD_DIR/tests;
@@ -42,5 +41,5 @@ after_success:
   - if [[ $TRAVIS_TAG = $TRAVIS_BRANCH ]]; then
       sudo pip install --upgrade six ;
       sudo pip install twine ;
-      twine upload wheelhouse/pdflib-*manylinux*.whl ;
+      twine upload wheelhouse/pdflib*.whl ;
     fi
