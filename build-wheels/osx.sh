@@ -2,7 +2,7 @@
 set -e -x
 
 # Install dependencies
-brew install -y freetype fontconfig libjpeg libpng libtiff
+brew install -y freetype fontconfig
 
 # Clone and compile poppler
 git clone --branch poppler-0.63.0 --depth 1 https://anongit.freedesktop.org/git/poppler/poppler.git poppler_src
