@@ -6,7 +6,9 @@ matrix:
       env: DOCKER_IMAGE=quay.io/pypa/manylinux1_x86_64
     - os: osx
       language: generic
-      env: PIP=pip2
+      env:
+        - PIP=pip2
+        - CIBW_BEFORE_BUILD="pip install cython"
 
 install:
   - if [[ $TRAVIS_OS_NAME = "linux" ]]; then docker pull $DOCKER_IMAGE; fi
@@ -32,7 +34,7 @@ script:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       $PIP install pdflib --no-index -f wheelhouse/;
       $PIP install pytest;
-      pytest tests;
+      python -m pytest tests;
     fi
 
 after_success:
