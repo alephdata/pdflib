@@ -27,7 +27,6 @@ script:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       export POPPLER_ROOT=$TRAVIS_BUILD_DIR/poppler_src/;
       export LD_LIBRARY_PATH="$TRAVIS_BUILD_DIR/poppler_src/:$TRAVIS_BUILD_DIR/poppler_src/cpp/";
-      # cibuildwheel --output-dir wheelhouse;
       ls $POPPLER_ROOT;
       pip2 install cython;
       python2 setup.py bdist_wheel;
