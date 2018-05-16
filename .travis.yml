@@ -31,6 +31,8 @@ script:
     fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       $PIP install -U --force-reinstall pdflib --no-index -f wheelhouse/;
+      ls;
+      rm -rf pdflib;
       $PIP install pytest;
       python2 -m pytest $TRAVIS_BUILD_DIR/tests;
     fi
