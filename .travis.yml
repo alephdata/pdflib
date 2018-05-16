@@ -41,5 +41,10 @@ after_success:
   - if [[ $TRAVIS_TAG = $TRAVIS_BRANCH ]]; then
       sudo pip install --upgrade six ;
       sudo pip install twine ;
-      twine upload wheelhouse/pdflib*.whl ;
+    fi
+  - if [[ $TRAVIS_OS_NAME = "linux" ]]; then
+      twine upload wheelhouse/pdflib*manylinux*.whl ;
+    fi
+  - if [[ $TRAVIS_OS_NAME = "osx" ]]; then
+      python -m twine upload wheelhouse/pdflib*macosx*.whl ;
     fi
