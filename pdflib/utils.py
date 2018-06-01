@@ -1,4 +1,5 @@
 from collections import defaultdict
+from datetime import datetime
 from lxml import etree
 
 RDF_NS = '{http://www.w3.org/1999/02/22-rdf-syntax-ns#}'
@@ -34,4 +35,10 @@ def _parse_namespace(key):
     return (namespace, key)
 
 
-__all__ = [xmp_to_dict]
+def parse_datestring(datestr):
+    """coverts date strings in pdf metadata like `u'D:19861200000000'` to
+    date objects"""
+    return datetime.strptime(datestr[2:15], '%Y%m%d%H%M%S')
+
+
+__all__ = [xmp_to_dict, parse_datestring]

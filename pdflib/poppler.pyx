@@ -6,7 +6,7 @@ import os
 import sys
 from collections import defaultdict
 import six
-from .utils import xmp_to_dict
+from .utils import xmp_to_dict, parse_datestring
 
 
 ctypedef bool GBool
@@ -237,6 +237,12 @@ cdef class Document:
                         mtdt[key] = val.takeString().getCString().decode(
                             'UTF-8', 'replace'
                         )
+                        # is it a date?
+                        if 'date' in key and mtdt[key].startswith('D:'):
+                            try:
+                                mtdt[key] = str(parse_datestring(mtdt[key]))
+                            except ValueError:
+                                pass
             else:
                 mtdt = {}
             return mtdt
