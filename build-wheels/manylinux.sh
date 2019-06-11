@@ -4,6 +4,7 @@ set -e -x
 cd /io/
 
 # Upgrade cmake
+yum install -y wget
 wget http://www.cmake.org/files/v3.2/cmake-3.2.0.tar.gz --no-check-certificate
 tar -zxf cmake-3.2.0.tar.gz
 cd cmake-3.2.0
@@ -13,7 +14,7 @@ gmake install
 cd ..
 
 # Install dependencies
-yum install -y freetype-devel.x86_64 fontconfig-devel.x86_64 libjpeg-devel.x86_64 libpng-devel.x86_64 libtiff-devel.x86_64
+yum install -y freetype-devel.x86_64 fontconfig-devel.x86_64 libpng-devel.x86_64 libtiff-devel.x86_64 libjpeg-turbo-devel
 
 # Clone and compile poppler
 git clone --branch poppler-0.63.0 --depth 1 https://anongit.freedesktop.org/git/poppler/poppler.git poppler_src

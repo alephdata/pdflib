@@ -102,7 +102,7 @@ cdef extern from "poppler/TextOutputDev.h":
         TextOutputDev(char *fileName, GBool physLayoutA, double fixedPitchA,
         GBool rawOrderA, GBool append)
         TextPage *takeText()
-        
+
     cdef cppclass TextPage:
         void incRefCnt()
         void decRefCnt()
@@ -143,7 +143,7 @@ cdef double RESOLUTION = 300.0
 
 
 cdef class Document:
-    cdef: 
+    cdef:
         PDFDoc *_doc
         ImageOutputDev *imgOut
         int _pg
@@ -169,7 +169,7 @@ cdef class Document:
         self._pg = 0
         self.phys_layout = phys_layout
         self.fixed_pitch = fixed_pitch
-        
+
     def __dealloc__(self):
         if self._doc != NULL:
             del self._doc
@@ -232,6 +232,8 @@ cdef class Document:
                 mtdt = {}
                 for i in range(0, metadata.getDict().getLength()):
                     key = metadata.getDict().getKey(i).lower()
+                    if isinstance(key, bytes):
+                        key = key.decode('UTF-8', 'replace')
                     val = metadata.getDict().getVal(i)
                     if val.isString():
                         mtdt[key] = val.takeString().getCString().decode(
