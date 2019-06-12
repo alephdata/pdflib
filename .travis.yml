@@ -4,47 +4,18 @@ matrix:
       services:
         - docker
       env: DOCKER_IMAGE=quay.io/pypa/manylinux2010_x86_64
-    - os: osx
-      language: generic
-      env: PIP=pip2 CIBW_BEFORE_BUILD="pip install cython"
 
 install:
-  - if [[ $TRAVIS_OS_NAME = "linux" ]]; then docker pull $DOCKER_IMAGE; fi
+  - docker pull $DOCKER_IMAGE
 
 script:
-  # LINUX
-  - if [[ $TRAVIS_OS_NAME = "linux" ]]; then sudo chmod +x ./build-wheels/manylinux.sh; fi
-  - if [[ $TRAVIS_OS_NAME = "linux" ]]; then
-      docker run --rm -v `pwd`:/io $DOCKER_IMAGE $PRE_CMD /io/build-wheels/manylinux.sh;
-    fi
-
-  # OS X
-  - if [[ $TRAVIS_OS_NAME = "osx" ]]; then
-      sudo chmod +x ./build-wheels/osx.sh;
-      bash ./build-wheels/osx.sh;
-    fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then $PIP install cibuildwheel==0.8.0 cython; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-      export POPPLER_ROOT=$TRAVIS_BUILD_DIR/poppler_src/;
-      export LD_LIBRARY_PATH="$TRAVIS_BUILD_DIR/poppler_src/:$TRAVIS_BUILD_DIR/poppler_src/cpp/";
-      cibuildwheel --output-dir wheelhouse;
-    fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-      $PIP install -U --force-reinstall pdflib --no-index -f wheelhouse/;
-      rm -rf pdflib;
-      $PIP install pytest;
-      python2 -m pytest $TRAVIS_BUILD_DIR/tests;
-    fi
+  - sudo chmod +x ./build-wheels/manylinux.sh
+  - docker run --rm -v `pwd`:/io $DOCKER_IMAGE $PRE_CMD /io/build-wheels/manylinux.sh
 
 after_success:
   - ls wheelhouse/
   - if [[ $TRAVIS_TAG = $TRAVIS_BRANCH ]]; then
-      if [[ $TRAVIS_OS_NAME = "linux" ]]; then
-        sudo pip install --upgrade six;
-        sudo pip install twine;
-        twine upload wheelhouse/pdflib*manylinux*.whl;
-      else
-        pip3 install twine;
-        python3 -m twine upload wheelhouse/pdflib*macosx*.whl;
-      fi
+      sudo pip install --upgrade six;
+      sudo pip install twine;
+      twine upload wheelhouse/pdflib*manylinux*.whl;
     fi
