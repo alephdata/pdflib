@@ -7,7 +7,13 @@ RDF_NS = '{http://www.w3.org/1999/02/22-rdf-syntax-ns#}'
 
 def xmp_to_dict(xmp):
     """Parse an XMP string into a python dictionary."""
-    tree = etree.fromstring(xmp)
+    parser = etree.XMLParser(
+        ns_clean=True,
+        recover=True,
+        resolve_entities=False,
+        no_network=True
+    )
+    tree = etree.fromstring(xmp, parser=parser)
     descriptions = tree.findall(RDF_NS+'Description')
     metadata = defaultdict(dict)
     if descriptions:
