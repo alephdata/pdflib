@@ -107,6 +107,7 @@ cdef extern from "poppler/TextOutputDev.h":
         void incRefCnt()
         void decRefCnt()
         TextFlow *getFlows()
+        GooString *getText(double xMin, double yMin, double xMax, double yMax) const
 
     cdef cppclass TextFlow:
         TextFlow *getNext()
@@ -303,10 +304,8 @@ cdef class Page:
     property lines:
         def __get__(self):
             lines = []
-            for flow in self:
-                for block in flow:
-                    for line in block:
-                        lines.append(line.text)
+            pageText = self.page.getText(sys.float_info.min, sys.float_info.min, sys.float_info.max, sys.float_info.max)
+            lines.append(pageText.getCString().decode('UTF-8'))
             return lines
 
     def extract_images(self, path, prefix):
