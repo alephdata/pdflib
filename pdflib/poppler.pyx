@@ -305,7 +305,8 @@ cdef class Page:
         def __get__(self):
             lines = []
             pageText = self.page.getText(sys.float_info.min, sys.float_info.min, sys.float_info.max, sys.float_info.max)
-            lines.append(pageText.getCString().decode('UTF-8'))
+            for line in pageText.getCString().decode('UTF-8').splitlines():
+                lines.append(line.strip())
             return lines
 
     def extract_images(self, path, prefix):
