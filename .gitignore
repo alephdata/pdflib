@@ -5,6 +5,7 @@ __pycache__/
 
 # C extensions
 *.so
+pdflib/poppler.cpp
 
 # Distribution / packaging
 .Python
