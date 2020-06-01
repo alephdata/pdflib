@@ -109,3 +109,6 @@ venv.bak/
 
 #poppler source
 poppler
+
+# test artifcts
+tests/images/
