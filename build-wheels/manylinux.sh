@@ -33,7 +33,7 @@ export LD_LIBRARY_PATH="/io/poppler_src/:/io/poppler_src/cpp/:/usr/lib64/:/usr/l
 export TWINE=/opt/python/cp37-cp37m/bin/twine
 
 # Compile wheels
-for PYBIN in /opt/python/*/bin; do
+for PYBIN in /opt/python/cp3*/bin; do
     "${PYBIN}/pip" install cython
     "${PYBIN}/pip" wheel /io/ -w wheelhouse/
 done
@@ -46,7 +46,7 @@ for whl in wheelhouse/pdflib*.whl; do
 done
 
 # Install packages and test
-for PYBIN in /opt/python/*/bin/; do
+for PYBIN in /opt/python/cp3*/bin/; do
     "${PYBIN}/pip" install pdflib --no-index -f wheelhouse/
     (cd $HOME; "${PYBIN}/python" -c "import pdflib")
     "${PYBIN}/pip" install pytest
