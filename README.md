@@ -16,7 +16,7 @@ From source:
 ```
 git clone --branch poppler-0.63.0 --depth 1 https://anongit.freedesktop.org/git/poppler/poppler.git poppler_src
 cd poppler_src/
-cmake -DENABLE_SPLASH=OFF -DENABLE_UTILS=OFF -DENABLE_LIBOPENJPEG=none .
+cmake -DENABLE_SPLASH=OFF -DBUILD_GTK_TESTS=OFF -DENABLE_UTILS=OFF -DENABLE_LIBOPENJPEG=none .
 make
 ```
 

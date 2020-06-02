@@ -19,21 +19,21 @@ yum install -y freetype-devel.x86_64 fontconfig-devel.x86_64 libpng-devel.x86_64
 # Clone and compile poppler
 git clone --branch poppler-0.63.0 --depth 1 https://anongit.freedesktop.org/git/poppler/poppler.git poppler_src
 cd poppler_src/
-cmake -DENABLE_SPLASH=OFF -DENABLE_UTILS=OFF -DENABLE_LIBOPENJPEG=none .
+cmake -DENABLE_SPLASH=OFF -DENABLE_UTILS=OFF -DENABLE_LIBOPENJPEG=none -DBUILD_GTK_TESTS=OFF .
 make --silent
 export POPPLER_ROOT=/io/poppler_src/
 cd ..
 
 # Set shared library paths
-export LD_LIBRARY_PATH="/io/poppler_src/:/io/poppler_src/cpp/:/usr/lib64/"
+export LD_LIBRARY_PATH="/io/poppler_src/:/io/poppler_src/cpp/:/usr/lib64/:/usr/local/lib"
 
 
 # install twine
-/opt/python/cp27-cp27m/bin/pip install twine
-export TWINE=/opt/python/cp27-cp27m/bin/twine
+/opt/python/cp37-cp37m/bin/pip install twine
+export TWINE=/opt/python/cp37-cp37m/bin/twine
 
 # Compile wheels
-for PYBIN in /opt/python/*/bin; do
+for PYBIN in /opt/python/cp3*/bin; do
     "${PYBIN}/pip" install cython
     "${PYBIN}/pip" wheel /io/ -w wheelhouse/
 done
@@ -46,7 +46,7 @@ for whl in wheelhouse/pdflib*.whl; do
 done
 
 # Install packages and test
-for PYBIN in /opt/python/*/bin/; do
+for PYBIN in /opt/python/cp3*/bin/; do
     "${PYBIN}/pip" install pdflib --no-index -f wheelhouse/
     (cd $HOME; "${PYBIN}/python" -c "import pdflib")
     "${PYBIN}/pip" install pytest

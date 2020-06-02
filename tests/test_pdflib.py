@@ -59,3 +59,13 @@ class TestPdflib(object):
     def test_empty_pdf(self):
         with pytest.raises(IOError):
             Document("tests/resources/empty.pdf")
+
+    def test_right_to_left(self):
+        doc = Document("tests/resources/Fairy-Circles-Truly-a-Fairy-Tale-R-FKB-Kids-Stories_FA.pdf")
+        text = ""
+        for page in doc:
+            text += ' \n'.join(page.lines).strip()
+
+        with open("tests/resources/Fairy-Circles-Truly-a-Fairy-Tale-R-FKB-Kids-Stories_FA.txt", "r") as f:
+            correct = f.read()
+        assert correct == text
