@@ -23,7 +23,7 @@ jobs:
         docker run --rm -v `pwd`:/io $DOCKER_IMAGE $PRE_CMD /io/build-wheels/manylinux.sh
     - name: Check the build artifacts and delete wheels from dependencies
       run: |
-        find . -type f ! -name 'pdflib*manylinux*.whl' -delete
+        find ./wheelhouse/ -type f ! -name 'pdflib*manylinux*.whl' -delete
         ls wheelhouse/
     - name: Publish a Python distribution to PyPI
       if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
