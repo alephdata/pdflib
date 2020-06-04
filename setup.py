@@ -44,7 +44,7 @@ poppler_ext = Extension('pdflib.poppler',
 
 setup(
     name='pdflib',
-    version='0.2.1',
+    version='0.3.0',
     description="python bindings for poppler",
     author='Journalism Development Network',
     author_email='data@occrp.org',
